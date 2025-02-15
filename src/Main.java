@@ -1,3 +1,4 @@
+import ru.tasktracker.Managers;
 import ru.tasktracker.TaskManager;
 import ru.tasktracker.tasks.*;
 
@@ -6,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Поехали!");
 
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
         Task t1 = taskManager.createTask("Task 1", "Description of task 1");
         Task t2 = taskManager.createTask("Task 2", "Description of task 2");
         Epic e1 = taskManager.createEpic("Epic 1", "Description of epic 1");

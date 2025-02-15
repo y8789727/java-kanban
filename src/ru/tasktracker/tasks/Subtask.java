@@ -4,8 +4,8 @@ public class Subtask extends Task {
 
     private final Epic epic;
 
-    public Subtask(String title, String description, Epic epic) {
-        super(title, description);
+    public Subtask(String title, String description, int id, Epic epic) {
+        super(title, description, id);
         this.epic = epic;
         epic.addSubtask(this);
     }
@@ -15,8 +15,8 @@ public class Subtask extends Task {
     }
 
     @Override
-    public void actionsAfterUpdate() {
-        super.actionsAfterUpdate();
-        epic.actionsAfterUpdate();
+    public void setStatus(TaskStatus status) {
+        super.setStatus(status);
+        epic.renewStatus();
     }
 }

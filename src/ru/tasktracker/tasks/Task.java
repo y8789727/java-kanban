@@ -1,5 +1,4 @@
 package ru.tasktracker.tasks;
-import ru.tasktracker.TaskManager;
 
 import java.util.Objects;
 
@@ -10,10 +9,10 @@ public class Task {
     private String description;
     private TaskStatus status = TaskStatus.NEW;
 
-    public Task(String title, String description) {
+    public Task(String title, String description, int id) {
         this.title = title;
         this.description = description;
-        this.id = TaskManager.getNextId();
+        this.id = id;
     }
 
     public String getTitle() {
@@ -63,8 +62,5 @@ public class Task {
                ", title='" + title + '\'' +
                ", status=" + status +
                "}";
-    }
-
-    public void actionsAfterUpdate() {
     }
 }

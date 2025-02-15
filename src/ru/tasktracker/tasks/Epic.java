@@ -1,16 +1,17 @@
 package ru.tasktracker.tasks;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
 
-    private final ArrayList<Subtask> subtasks = new ArrayList<>();
+    private final List<Subtask> subtasks = new ArrayList<>();
 
-    public Epic(String title, String description) {
-        super(title, description);
+    public Epic(String title, String description, int id) {
+        super(title, description, id);
     }
 
-    private void renewStatus() {
+    public void renewStatus() {
         TaskStatus newEpicStatus;
         if (!subtasks.isEmpty()) {
             newEpicStatus = subtasks.getFirst().getStatus();
@@ -24,7 +25,7 @@ public class Epic extends Task {
             newEpicStatus = TaskStatus.NEW;
         }
 
-        this.setStatus(newEpicStatus);
+        super.setStatus(newEpicStatus);
     }
 
     public void addSubtask(Subtask subtask) {
@@ -32,7 +33,7 @@ public class Epic extends Task {
         renewStatus();
     }
 
-    public ArrayList<Subtask> getSubtasks() {
+    public List<Subtask> getSubtasks() {
         return subtasks;
     }
 
@@ -42,9 +43,8 @@ public class Epic extends Task {
     }
 
     @Override
-    public void actionsAfterUpdate() {
-        super.actionsAfterUpdate();
-        renewStatus();
+    public void setStatus(TaskStatus status) {
+        // Status cannot be directly changed for epic
     }
 
     @Override
