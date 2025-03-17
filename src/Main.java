@@ -1,3 +1,5 @@
+import ru.tasktracker.HistoryManager;
+import ru.tasktracker.InMemoryTaskManager;
 import ru.tasktracker.Managers;
 import ru.tasktracker.TaskManager;
 import ru.tasktracker.tasks.*;
@@ -5,34 +7,35 @@ import ru.tasktracker.tasks.*;
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("Поехали!");
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        TaskManager taskManager = new InMemoryTaskManager(historyManager);
 
-        TaskManager taskManager = Managers.getDefault();
         Task t1 = taskManager.createTask("Task 1", "Description of task 1");
         Task t2 = taskManager.createTask("Task 2", "Description of task 2");
+
         Epic e1 = taskManager.createEpic("Epic 1", "Description of epic 1");
         Subtask e1s1 = taskManager.createSubtask("Subtask 1 of Epic 1", "Some description", e1);
         Subtask e1s2 = taskManager.createSubtask("Subtask 2 of Epic 1", "Some description", e1);
+        Subtask e1s3 = taskManager.createSubtask("Subtask 3 of Epic 1", "Some description", e1);
+
         Epic e2 = taskManager.createEpic("Epic 2", "Description of epic 2");
-        Subtask e2s1 = taskManager.createSubtask("Subtask 1 of Epic 2", "Some description", e2);
-        System.out.println("Исходные задачи:");
-        taskManager.printAllTasks(System.out);
-        System.out.println();
 
-        t2.setStatus(TaskStatus.DONE);
-        taskManager.updateTask(t2);
-        e1s2.setTitle("Updated subtask");
-        e1s2.setStatus(TaskStatus.DONE);
-        taskManager.updateTask(e1s2);
-        System.out.println("Задачи после изменения:");
-        taskManager.printAllTasks(System.out);
-        System.out.println();
+        taskManager.getTaskById(t2.getId());
+        taskManager.getTaskById(t1.getId());
+        taskManager.getTaskById(t2.getId());
+        System.out.println("История запросов 1:\n" + historyManager.getHistory() + "\n");
 
-        taskManager.removeTaskById(t1.getId());
-        taskManager.removeTaskById(e2.getId());
-        taskManager.removeTaskById(e1s1.getId());
-        System.out.println("Задачи после удаления некоторых:");
-        taskManager.printAllTasks(System.out);
-        System.out.println();
+        taskManager.getTaskById(e2.getId());
+        taskManager.getTaskById(e1s2.getId());
+        taskManager.getTaskById(e1s3.getId());
+        taskManager.getTaskById(e1.getId());
+        taskManager.getTaskById(e2.getId());
+        System.out.println("История запросов 2:\n" + historyManager.getHistory() + "\n");
+
+        taskManager.removeTaskById(t2.getId());
+        System.out.println("История запросов 3:\n" + historyManager.getHistory() + "\n");
+
+        taskManager.removeTaskById(e1.getId());
+        System.out.println("История запросов 4:\n" + historyManager.getHistory() + "\n");
     }
 }

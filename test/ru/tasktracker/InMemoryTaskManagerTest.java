@@ -4,9 +4,10 @@ import ru.tasktracker.tasks.*;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
 
@@ -52,6 +53,38 @@ class InMemoryTaskManagerTest {
         assertEquals(t1, t, "Ошибка поиска задачи по Id");
 
         assertEquals(1,  historyManager.getHistory().size(), "История получения не записалась");
+    }
+
+    @Test
+    public void whenRemoveTaskHistoryChanged() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        TaskManager taskManager = new InMemoryTaskManager(historyManager);
+
+        Task t1 = taskManager.createTask("Task1", "desc");
+        Task t2 = taskManager.createTask("Task2", "desc");
+        taskManager.getTaskById(t1.getId());
+        taskManager.getTaskById(t2.getId());
+        taskManager.removeTaskById(t1.getId());
+
+        List<Task> taskHistory = new ArrayList<>();
+        taskHistory.add(t2);
+
+        assertArrayEquals(taskHistory.toArray(),historyManager.getHistory().toArray(), "После удаления задачи запись в истории не удалена");
+    }
+
+    @Test
+    public void whenRemoveAllTaskHistoryEmpty() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        TaskManager taskManager = new InMemoryTaskManager(historyManager);
+
+        Task t1 = taskManager.createTask("Task1", "desc");
+        Task t2 = taskManager.createTask("Task2", "desc");
+        taskManager.getTaskById(t1.getId());
+        taskManager.getTaskById(t2.getId());
+        assertEquals(2,  historyManager.getHistory().size(), "История получения не записалась");
+
+        taskManager.removeAllTasks();
+        assertTrue(historyManager.getHistory().isEmpty(), "После очистки всех задач список истории не пуст");
     }
 
     @Test

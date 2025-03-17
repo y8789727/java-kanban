@@ -6,25 +6,66 @@ import ru.tasktracker.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryHistoryManagerTest {
-    @Test
-    public void onlyMAXTaskCanBeInHistory() {
-        HistoryManager historyManager = Managers.getDefaultHistory();
 
-        Task t = new Task("t1", "desc", -1);
-        historyManager.add(t);
-        historyManager.add(t);
+    @Test
+    public void taskInHistoryAppearsOnlyOnce() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        Task t1 = new Task("t1", "desc", -1);
+        Task t2 = new Task("t2", "desc", -2);
+        historyManager.add(t1);
+        historyManager.add(t2);
+        historyManager.add(t1);
         assertEquals(2, historyManager.getHistory().size(), "Некорректное количество после добавления одной задачи дважды");
 
         List<Task> tasks = new ArrayList<>();
-        for (int i = 0; i < HistoryManager.MAX_ELEMENTS_IN_HISTORY; i++) {
-            Task newTask = new Task( "task " + i, "desc", i);
-            tasks.addFirst(newTask);
-            historyManager.add(newTask);
-        }
+        tasks.add(t1);
+        tasks.add(t2);
         assertArrayEquals(tasks.toArray(),historyManager.getHistory().toArray(), "История записана некорректно");
+    }
+
+    @Test
+    public void checkRemoveTasksFromHistory() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        Task t1 = new Task("t1", "desc", -1);
+        Task t2 = new Task("t2", "desc", -2);
+        historyManager.add(t1);
+        historyManager.add(t2);
+        historyManager.remove(t1.getId());
+        List<Task> tasks = new ArrayList<>();
+        tasks.add(t2);
+        assertArrayEquals(tasks.toArray(),historyManager.getHistory().toArray(), "После удаления задачи история записана некорректно");
+
+        historyManager.remove(t2.getId());
+        assertTrue(historyManager.getHistory().isEmpty(), "После удаления всех задачи из истории список не пуст");
+    }
+
+    @Test
+    public void deleteNotExistentTaskFromHistory() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        Task t1 = new Task("t1", "desc", -1);
+        Task t2 = new Task("t2", "desc", -2);
+        historyManager.add(t1);
+        historyManager.add(t2);
+        List<Task> tasks = new ArrayList<>();
+        tasks.add(t2);
+        tasks.add(t1);
+
+        historyManager.remove(-99);
+        assertArrayEquals(tasks.toArray(),historyManager.getHistory().toArray(), "После удаления несуществующей задачи история записана некорректно");
+    }
+
+    @Test
+    public void checkClearHistory() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        Task t1 = new Task("t1", "desc", -1);
+        Task t2 = new Task("t2", "desc", -2);
+        historyManager.add(t1);
+        historyManager.add(t2);
+
+        historyManager.clearHistory();
+        assertTrue(historyManager.getHistory().isEmpty(), "После очистки истории список не пуст");
     }
 }
