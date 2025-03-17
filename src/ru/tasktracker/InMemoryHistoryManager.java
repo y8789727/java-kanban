@@ -68,16 +68,16 @@ public class InMemoryHistoryManager implements HistoryManager {
             lastTask = n.prev;
         }
     }
-}
 
-class Node<T> {
-    Node<T> prev;
-    Node<T> next;
-    T data;
+    private class Node<T> {
+        Node<T> prev;
+        Node<T> next;
+        T data;
 
-    Node(T data, Node<T> prev, Node<T> next) {
-        this.data = data;
-        this.next = next;
-        this.prev = prev;
+        Node(T data, Node<T> prev, Node<T> next) {
+            this.data = data;
+            this.next = next;
+            this.prev = prev;
+        }
     }
 }
