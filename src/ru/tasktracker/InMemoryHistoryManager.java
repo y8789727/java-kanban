@@ -4,12 +4,13 @@ import ru.tasktracker.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
     Node<Task> lastTask;
-    final HashMap<Integer, Node<Task>> historyIndex = new HashMap<>();
+    final Map<Integer, Node<Task>> historyIndex = new HashMap<>();
 
     @Override
     public void add(Task task) {
