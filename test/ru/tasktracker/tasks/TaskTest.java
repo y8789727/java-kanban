@@ -39,4 +39,10 @@ class TaskTest {
 
         assertEquals(task, taskSameId, "Задачи с одинаковым ID не считаются одной и той же задачей");
     }
+
+    @Test
+    public void checkTaskTypeValid() {
+        Task task = new Task("Task", "Task desc", -1);
+        assertEquals(TaskType.TASK, task.getType(), "Тип задачи определен некорректно");
+    }
 }

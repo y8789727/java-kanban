@@ -43,6 +43,11 @@ public class Epic extends Task {
     }
 
     @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
+    }
+
+    @Override
     public void setStatus(TaskStatus status) {
         // Status cannot be directly changed for epic
     }
