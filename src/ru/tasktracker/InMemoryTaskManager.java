@@ -3,7 +3,10 @@ package ru.tasktracker;
 import ru.tasktracker.tasks.*;
 
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     private int idGenerator = 0;

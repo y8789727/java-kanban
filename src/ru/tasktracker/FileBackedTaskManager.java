@@ -2,9 +2,18 @@ package ru.tasktracker;
 
 import ru.tasktracker.exceptions.ManagerLoadException;
 import ru.tasktracker.exceptions.ManagerSaveException;
-import ru.tasktracker.tasks.*;
+import ru.tasktracker.tasks.Epic;
+import ru.tasktracker.tasks.Subtask;
+import ru.tasktracker.tasks.Task;
+import ru.tasktracker.tasks.TaskStatus;
+import ru.tasktracker.tasks.TaskType;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -14,11 +23,13 @@ import java.util.Map;
 public class FileBackedTaskManager extends InMemoryTaskManager {
     final Path file;
 
-    private FileBackedTaskManager(HistoryManager historyManager, Path file, boolean saveFile) {
+    public static final String CSV_FILE_HEADER = "id,type,name,status,description,epic";
+
+    private FileBackedTaskManager(HistoryManager historyManager, Path file, boolean isFileSaveNeeded) {
         super(historyManager);
         this.file = file;
 
-        if (saveFile) {
+        if (isFileSaveNeeded) {
             save();
         }
     }
@@ -31,7 +42,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         List<Task> tasks = super.getAllTasks();
 
         try (final BufferedWriter writer = new BufferedWriter(new FileWriter(file.toFile()))) {
-            writer.write("id,type,name,status,description,epic");
+            writer.write(CSV_FILE_HEADER);
 
             for (Task t : tasks) {
                 writer.newLine();
@@ -53,7 +64,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return String.format("%d,%s,%s,%s,%s,%s", t.getId(), t.getType(), t.getTitle(), t.getStatus(), t.getDescription(), epicId);
     }
 
-    private static Task csvLineToTask(String line, Map<Integer, Epic> epics) {
+    private static Task CSVLineToTask(String line, Map<Integer, Epic> epics) {
         final Task task;
 
         String[] columns = line.split(",", 6);
@@ -105,7 +116,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     reader.readLine();
                     firstLineRead = true;
                 } else {
-                    fileTaskManager.addTask(csvLineToTask(reader.readLine(), epics));
+                    fileTaskManager.addTask(CSVLineToTask(reader.readLine(), epics));
                 }
             }
         } catch (IOException e) {
