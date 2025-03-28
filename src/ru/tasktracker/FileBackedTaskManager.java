@@ -46,7 +46,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             for (Task t : tasks) {
                 writer.newLine();
-                writer.write(taskToCSVLine(t));
+                writer.write(taskToString(t));
             }
 
             writer.flush();
@@ -55,7 +55,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private static String taskToCSVLine(Task t) {
+    private static String taskToString(Task t) {
         String epicId = "";
         if (TaskType.SUBTASK.equals(t.getType())) {
             epicId = Integer.toString(((Subtask) t).getEpic().getId());
@@ -64,7 +64,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return String.format("%d,%s,%s,%s,%s,%s", t.getId(), t.getType(), t.getTitle(), t.getStatus(), t.getDescription(), epicId);
     }
 
-    private static Task CSVLineToTask(String line, Map<Integer, Epic> epics) {
+    private static Task stringToTask(String line, Map<Integer, Epic> epics) {
         final Task task;
 
         String[] columns = line.split(",", 6);
@@ -116,7 +116,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     reader.readLine();
                     firstLineRead = true;
                 } else {
-                    fileTaskManager.addTask(CSVLineToTask(reader.readLine(), epics));
+                    fileTaskManager.addTask(stringToTask(reader.readLine(), epics));
                 }
             }
         } catch (IOException e) {
