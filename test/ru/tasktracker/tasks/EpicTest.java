@@ -52,4 +52,10 @@ class EpicTest {
         epic.removeSubtask(s3);
         assertEquals(TaskStatus.NEW, epic.getStatus(), "Удаление всех подзадач должно перевести статус эпика в NEW");
     }
+
+    @Test
+    public void checkTaskTypeValid() {
+        Task task = new Epic("Task", "Task desc", -1);
+        assertEquals(TaskType.EPIC, task.getType(), "Тип задачи определен некорректно");
+    }
 }

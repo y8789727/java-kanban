@@ -4,14 +4,14 @@ import ru.tasktracker.tasks.*;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
     private int idGenerator = 0;
 
-    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Task> tasks = new LinkedHashMap<>();
     private final HistoryManager history;
 
     public InMemoryTaskManager(HistoryManager historyManager) {
@@ -71,9 +71,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null) {
             tasks.remove(id);
             history.remove(id);
-            if (task instanceof Subtask) {
+            if (TaskType.SUBTASK.equals(task.getType())) {
                 ((Subtask) task).getEpic().removeSubtask((Subtask) task);
-            } else if (task instanceof Epic) {
+            } else if (TaskType.EPIC.equals(task.getType())) {
                 for (Subtask subtask : ((Epic) task).getSubtasks()) {
                     tasks.remove(subtask.getId());
                     history.remove(subtask.getId());
@@ -82,7 +82,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    private void addTask(Task t) {
+    protected void addTask(Task t) {
         tasks.put(t.getId(), t);
     }
 
