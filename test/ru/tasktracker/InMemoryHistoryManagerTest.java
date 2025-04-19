@@ -3,6 +3,8 @@ package ru.tasktracker;
 import org.junit.jupiter.api.Test;
 import ru.tasktracker.tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,11 +12,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryHistoryManagerTest {
 
+    private static final Duration duration20 = Duration.ofMinutes(20);
+
     @Test
     public void taskInHistoryAppearsOnlyOnce() {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        Task t1 = new Task("t1", "desc", -1);
-        Task t2 = new Task("t2", "desc", -2);
+        Task t1 = new Task("t1", "desc", -1, duration20, LocalDateTime.of(2025,1,1,10,0));
+        Task t2 = new Task("t2", "desc", -2, duration20, LocalDateTime.of(2025,1,1,11,0));
         historyManager.add(t1);
         historyManager.add(t2);
         historyManager.add(t1);
@@ -29,8 +33,8 @@ class InMemoryHistoryManagerTest {
     @Test
     public void checkRemoveTasksFromHistory() {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        Task t1 = new Task("t1", "desc", -1);
-        Task t2 = new Task("t2", "desc", -2);
+        Task t1 = new Task("t1", "desc", -1, duration20, LocalDateTime.of(2025,1,1,10,0));
+        Task t2 = new Task("t2", "desc", -2, duration20, LocalDateTime.of(2025,1,1,11,0));
         historyManager.add(t1);
         historyManager.add(t2);
         historyManager.remove(t1.getId());
@@ -45,8 +49,8 @@ class InMemoryHistoryManagerTest {
     @Test
     public void deleteNotExistentTaskFromHistory() {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        Task t1 = new Task("t1", "desc", -1);
-        Task t2 = new Task("t2", "desc", -2);
+        Task t1 = new Task("t1", "desc", -1, duration20, LocalDateTime.of(2025,1,1,10,0));
+        Task t2 = new Task("t2", "desc", -2, duration20, LocalDateTime.of(2025,1,1,11,0));
         historyManager.add(t1);
         historyManager.add(t2);
         List<Task> tasks = new ArrayList<>();
@@ -60,8 +64,8 @@ class InMemoryHistoryManagerTest {
     @Test
     public void checkClearHistory() {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        Task t1 = new Task("t1", "desc", -1);
-        Task t2 = new Task("t2", "desc", -2);
+        Task t1 = new Task("t1", "desc", -1, duration20, LocalDateTime.of(2025,1,1,10,0));
+        Task t2 = new Task("t2", "desc", -2, duration20, LocalDateTime.of(2025,1,1,11,0));
         historyManager.add(t1);
         historyManager.add(t2);
 

@@ -16,6 +16,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +26,8 @@ import java.util.Map;
 public class FileBackedTaskManager extends InMemoryTaskManager {
     final Path file;
 
-    public static final String CSV_FILE_HEADER = "id,type,name,status,description,epic";
+    public static final String CSV_FILE_HEADER = "id,type,name,status,description,epic,duration,startTime";
+    private static final DateTimeFormatter csvDateFormatter = DateTimeFormatter.ofPattern("ddMMyyyyHHmm");
 
     private FileBackedTaskManager(HistoryManager historyManager, Path file, boolean isFileSaveNeeded) {
         super(historyManager);
@@ -61,13 +65,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             epicId = Integer.toString(((Subtask) t).getEpic().getId());
         }
 
-        return String.format("%d,%s,%s,%s,%s,%s", t.getId(), t.getType(), t.getTitle(), t.getStatus(), t.getDescription(), epicId);
+        String duration = "";
+        String startTime = "";
+        if (!TaskType.EPIC.equals(t.getType())) {
+            if (t.getDuration() != null) {
+                duration = Long.toString(t.getDuration().toMinutes());
+            }
+
+            if (t.getStartTime() != null) {
+                startTime = t.getStartTime().format(csvDateFormatter);
+            }
+        }
+
+        return String.format("%d,%s,%s,%s,%s,%s,%s,%s", t.getId(), t.getType(), t.getTitle(), t.getStatus(), t.getDescription(), epicId, duration, startTime);
     }
 
     private static Task stringToTask(String line, Map<Integer, Epic> epics) {
         final Task task;
 
-        String[] columns = line.split(",", 6);
+        String[] columns = line.split(",", 8);
         int i = 0;
         final int taskId = Integer.parseInt(columns[i++]);
         final TaskType taskType = TaskType.valueOf(columns[i++]);
@@ -75,12 +91,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         final TaskStatus taskStatus = TaskStatus.valueOf(columns[i++]);
         final String taskDescription = columns[i++];
         Integer epicId = null;
-        if (!columns[i].isEmpty()) {
-            epicId = Integer.parseInt(columns[i]);
+        String epicIdStr = columns[i++];
+        if (!epicIdStr.isEmpty()) {
+            epicId = Integer.parseInt(epicIdStr);
+        }
+        Duration duration = null;
+        String durationStr = columns[i++];
+        if (!durationStr.isEmpty()) {
+            duration = Duration.ofMinutes(Integer.parseInt(durationStr));
+        }
+        LocalDateTime startTime = null;
+        String startTimeStr = columns[i++];
+        if (!startTimeStr.isEmpty()) {
+            startTime = LocalDateTime.parse(startTimeStr, csvDateFormatter);
         }
 
         if (TaskType.TASK.equals(taskType)) {
-            task = new Task(taskTitle, taskDescription, taskId);
+            task = new Task(taskTitle, taskDescription, taskId, duration, startTime);
             task.setStatus(taskStatus);
         } else if (TaskType.EPIC.equals(taskType)) {
             task = new Epic(taskTitle, taskDescription, taskId);
@@ -95,7 +122,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 throw new ManagerLoadException(String.format("Для подзадачи id=%d эпик с id=%d не найден", taskId, epicId));
             }
 
-            task = new Subtask(taskTitle, taskDescription, taskId, epic);
+            task = new Subtask(taskTitle, taskDescription, taskId, epic, duration, startTime);
             task.setStatus(taskStatus);
         } else {
             throw new ManagerLoadException("Неподдерживаемый тип задач: " + taskType);
@@ -153,12 +180,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static void main(String[] args) {
         try {
             Path src = File.createTempFile("srcMain", ".csv").toPath();
+            Duration duration = Duration.ofMinutes(30);
+            LocalDateTime startTime = LocalDateTime.of(2025,1,1,10,0);
 
             FileBackedTaskManager tm1 = new FileBackedTaskManager(Managers.getDefaultHistory(), src);
-            tm1.createTask("t1", "t1d");
+            tm1.createTask("t1", "t1d", duration, startTime);
             Epic e = tm1.createEpic("e1", "e1d");
-            tm1.createSubtask("e1s1", "e1s1d", e);
-            Subtask s2 = tm1.createSubtask("e1s2", "e1s2d", e);
+            tm1.createSubtask("e1s1", "e1s1d", e, duration, startTime);
+            Subtask s2 = tm1.createSubtask("e1s2", "e1s2d", e, duration, startTime);
             s2.setStatus(TaskStatus.DONE);
             tm1.updateTask(s2);
 

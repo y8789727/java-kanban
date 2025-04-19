@@ -1,5 +1,7 @@
 package ru.tasktracker.tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -8,11 +10,15 @@ public class Task {
     private String title;
     private String description;
     private TaskStatus status = TaskStatus.NEW;
+    private Duration duration;
+    private LocalDateTime startTime;
 
-    public Task(String title, String description, int id) {
+    public Task(String title, String description, int id, Duration duration, LocalDateTime startTime) {
         this.title = title;
         this.description = description;
         this.id = id;
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
     public String getTitle() {
@@ -66,5 +72,32 @@ public class Task {
                ", title='" + title + '\'' +
                ", status=" + status +
                "}";
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
+    }
+
+    public boolean intersects(Task t) {
+        return this.getStartTime() != null
+                && t.getStartTime() != null
+                && this.getStartTime().isBefore(t.getEndTime())
+                && this.getEndTime().isAfter(t.getStartTime());
     }
 }
