@@ -65,7 +65,7 @@ public class Epic extends Task {
     private void updateSubtasksEndDate(Subtask subtask) {
         if (endTime == null) {
             endTime = subtask.getEndTime();
-        } else if(endTime.isBefore(subtask.getEndTime()))  {
+        } else if (endTime.isBefore(subtask.getEndTime()))  {
             endTime = subtask.getEndTime();
         }
     }
