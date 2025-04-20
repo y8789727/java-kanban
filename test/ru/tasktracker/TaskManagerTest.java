@@ -3,11 +3,17 @@ package ru.tasktracker;
 import org.junit.jupiter.api.Test;
 
 import ru.tasktracker.exceptions.TaskIntersectionDetected;
-import ru.tasktracker.tasks.*;
+import ru.tasktracker.tasks.Task;
+import ru.tasktracker.tasks.Epic;
+import ru.tasktracker.tasks.Subtask;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TaskManagerTest {
 

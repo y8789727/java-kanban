@@ -1,7 +1,10 @@
 package ru.tasktracker;
 
 import ru.tasktracker.exceptions.TaskIntersectionDetected;
-import ru.tasktracker.tasks.*;
+import ru.tasktracker.tasks.Task;
+import ru.tasktracker.tasks.Epic;
+import ru.tasktracker.tasks.Subtask;
+import ru.tasktracker.tasks.TaskType;
 
 import java.io.PrintStream;
 import java.time.Duration;

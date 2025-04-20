@@ -1,15 +1,17 @@
 package ru.tasktracker;
 
-import ru.tasktracker.tasks.*;
-
 import org.junit.jupiter.api.Test;
+
+import ru.tasktracker.tasks.Task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InMemoryTaskManagerTest extends TaskManagerTest {
 
