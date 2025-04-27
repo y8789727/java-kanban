@@ -12,10 +12,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class FileBackedTaskManagerTest {
+class FileBackedTaskManagerTest extends TaskManagerTest {
 
     @Test
     public void checkEmptyFile() throws IOException {
@@ -40,28 +42,29 @@ class FileBackedTaskManagerTest {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(expected.toFile()))) {
             writer.write(FileBackedTaskManager.CSV_FILE_HEADER);
             writer.newLine();
-            writer.write("1,TASK,t1,NEW,t1d,");
+            writer.write("1,TASK,t1,NEW,t1d,,20,010120251000");
             writer.newLine();
-            writer.write("2,EPIC,e1,IN_PROGRESS,e1d,");
+            writer.write("2,EPIC,e1,IN_PROGRESS,e1d,,,");
             writer.newLine();
-            writer.write("3,SUBTASK,e1s1,NEW,e1s1d,2");
+            writer.write("3,SUBTASK,e1s1,NEW,e1s1d,2,20,010120251100");
             writer.newLine();
-            writer.write("4,SUBTASK,e1s2,DONE,e1s2d,2");
+            writer.write("4,SUBTASK,e1s2,DONE,e1s2d,2,20,010120251200");
             writer.newLine();
-            writer.write("99,TASK,t99,NEW,t99d,");
+            writer.write("99,TASK,t99,NEW,t99d,,20,020120251000");
 
             writer.flush();
         }
 
         Path working = File.createTempFile("working", ".csv").toPath();
         FileBackedTaskManager tm = new FileBackedTaskManager(Managers.getDefaultHistory(), working);
-        tm.createTask("t1", "t1d");
+        Duration duration20 = Duration.ofMinutes(20);
+        tm.createTask("t1", "t1d", duration20, LocalDateTime.of(2025,1,1,10,0));
         Epic e = tm.createEpic("e1", "e1d");
-        tm.createSubtask("e1s1", "e1s1d", e);
-        Subtask s2 = tm.createSubtask("e1s2", "e1s2d", e);
+        tm.createSubtask("e1s1", "e1s1d", e, duration20, LocalDateTime.of(2025,1,1,11,0));
+        Subtask s2 = tm.createSubtask("e1s2", "e1s2d", e, duration20, LocalDateTime.of(2025,1,1,12,0));
         s2.setStatus(TaskStatus.DONE);
         tm.updateTask(s2);
-        Task t = new Task("t99","t99d",99);
+        Task t = new Task("t99","t99d",99, duration20, LocalDateTime.of(2025,1,2,10,0));
         tm.addTask(t);
 
         assertEquals(-1L, Files.mismatch(expected, working), "Некорректный результирующий файл");
@@ -76,13 +79,13 @@ class FileBackedTaskManagerTest {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(src.toFile()))) {
             writer.write(FileBackedTaskManager.CSV_FILE_HEADER);
             writer.newLine();
-            writer.write("1,TASK,t1,NEW,t1d,");
+            writer.write("1,TASK,t1,NEW,t1d,,20,010120251000");
             writer.newLine();
-            writer.write("2,EPIC,e1,IN_PROGRESS,e1d,");
+            writer.write("2,EPIC,e1,IN_PROGRESS,e1d,,,");
             writer.newLine();
-            writer.write("3,SUBTASK,e1s1,NEW,e1s1d,2");
+            writer.write("3,SUBTASK,e1s1,NEW,e1s1d,2,20,010120251100");
             writer.newLine();
-            writer.write("4,SUBTASK,e1s2,DONE,e1s2d,2");
+            writer.write("4,SUBTASK,e1s2,DONE,e1s2d,2,20,010120251200");
 
             writer.flush();
         }
@@ -91,7 +94,7 @@ class FileBackedTaskManagerTest {
 
         assertEquals(4, tm.getAllTasks().size(), "Неверное количество задач");
 
-        Epic e = (Epic) tm.getTaskById(2);
+        Epic e = (Epic) tm.getTaskById(2).get();
         assertEquals(TaskStatus.IN_PROGRESS, e.getStatus(), "Некорректный статус эпика");
         assertEquals(2, e.getSubtasks().size(), "Неверное количество подзадач в эпике");
 
@@ -104,13 +107,13 @@ class FileBackedTaskManagerTest {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(src.toFile()))) {
             writer.write(FileBackedTaskManager.CSV_FILE_HEADER);
             writer.newLine();
-            writer.write("1,TASK,t1,NEW,t1d,");
+            writer.write("1,TASK,t1,NEW,t1d,,20,010120251000");
             writer.newLine();
-            writer.write("2,EPIC,e1,IN_PROGRESS,e1d,");
+            writer.write("2,EPIC,e1,IN_PROGRESS,e1d,,,");
             writer.newLine();
-            writer.write("3,SUBTASK,e1s1,NEW,e1s1d,2");
+            writer.write("3,SUBTASK,e1s1,NEW,e1s1d,2,20,010120251100");
             writer.newLine();
-            writer.write("4,SUBTASK,e1s2,DONE,e1s2d,2");
+            writer.write("4,SUBTASK,e1s2,DONE,e1s2d,2,20,010120251200");
 
             writer.flush();
         }
@@ -122,11 +125,11 @@ class FileBackedTaskManagerTest {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(expected1.toFile()))) {
             writer.write(FileBackedTaskManager.CSV_FILE_HEADER);
             writer.newLine();
-            writer.write("2,EPIC,e1,IN_PROGRESS,e1d,");
+            writer.write("2,EPIC,e1,IN_PROGRESS,e1d,,,");
             writer.newLine();
-            writer.write("3,SUBTASK,e1s1,NEW,e1s1d,2");
+            writer.write("3,SUBTASK,e1s1,NEW,e1s1d,2,20,010120251100");
             writer.newLine();
-            writer.write("4,SUBTASK,e1s2,DONE,e1s2d,2");
+            writer.write("4,SUBTASK,e1s2,DONE,e1s2d,2,20,010120251200");
 
             writer.flush();
         }
