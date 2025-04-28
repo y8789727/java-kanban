@@ -138,4 +138,9 @@ public class InMemoryTaskManager implements TaskManager {
         return prioritizedTasks.stream()
                 .anyMatch(t -> t.getId() != task.getId() && t.intersects(task));
     }
+
+    @Override
+    public List<Task> getHistory() {
+        return history.getHistory();
+    }
 }
