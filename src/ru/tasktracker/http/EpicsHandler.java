@@ -51,7 +51,7 @@ public class EpicsHandler extends BaseHttpHandler {
             manager.removeTaskById(Integer.parseInt(pathParts[2]));
             sendOK(exchange);
         } else {
-            throw new IOException("Unsupported tasks request");
+            throw new UnsupportedOperationException("Unsupported tasks request");
         }
     }
 }

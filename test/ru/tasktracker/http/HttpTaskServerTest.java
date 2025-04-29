@@ -15,6 +15,7 @@ import ru.tasktracker.tasks.Subtask;
 import ru.tasktracker.tasks.Task;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -80,7 +81,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         List<Task> historyResponse = gson.fromJson(response.body(), new TaskListTypeToken().getType());
         assertEquals(2, historyResponse.size(), "Некорректное количество задач в истории");
@@ -106,7 +107,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         List<Task> prioritizedResponse = gson.fromJson(response.body(), new TaskListTypeToken().getType());
 
@@ -135,7 +136,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         List<Task> tasks = gson.fromJson(response.body(), new TaskListTypeToken().getType());
 
@@ -163,7 +164,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         Task resultTask = gson.fromJson(response.body(), Task.class);
         assertEquals(t1, resultTask, "Задачи не совпадают");
@@ -186,12 +187,14 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(404, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.statusCode(), "Неверный код ответа");
     }
 
     @Test
     public void whenCreateTaskThenTaskCreated() throws IOException, InterruptedException {
-        var body = HttpRequest.BodyPublishers.ofString("{\"title\":\"SomeTask\",\"description\":\"desc\",\"status\":\"NEW\",\"duration\":20,\"startTime\":\"01012025100000\",\"taskType\":\"TASK\"}", StandardCharsets.UTF_8);
+        var body = HttpRequest.BodyPublishers.ofString("""
+                {"title":"SomeTask","description":"desc","status":"NEW","duration":20,"startTime":"01012025100000","taskType":"TASK"}
+                """, StandardCharsets.UTF_8);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(HOST + "/tasks"))
@@ -204,7 +207,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(201, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode(), "Неверный код ответа");
         assertEquals(1, taskManager.getAllTasks().size(), "Неверное количество задач");
     }
 
@@ -225,7 +228,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(201, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode(), "Неверный код ответа");
         assertEquals("SomeTask", taskManager.getTaskById(t1.getId()).get().getTitle(), "Задача не обновилась");
         assertEquals(1, taskManager.getAllTasks().size(), "Неверное количество задач");
     }
@@ -247,7 +250,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(406, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_NOT_ACCEPTABLE, response.statusCode(), "Неверный код ответа");
     }
 
     @Test
@@ -265,7 +268,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
         assertEquals(0, taskManager.getAllTasks().size(), "Неверное количество задач");
     }
 
@@ -287,7 +290,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         List<Epic> tasks = gson.fromJson(response.body(), new TaskListTypeToken().getType());
 
@@ -314,7 +317,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         Epic resultTask = gson.fromJson(response.body(), Epic.class);
         assertEquals(e1, resultTask, "Задачи не совпадают");
@@ -337,7 +340,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(404, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.statusCode(), "Неверный код ответа");
     }
 
     @Test
@@ -357,7 +360,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         List<Subtask> tasks = gson.fromJson(response.body(), new TaskListTypeToken().getType());
 
@@ -369,11 +372,12 @@ class HttpTaskServerTest {
 
     @Test
     public void whenCreateEpicThenEpicCreated() throws IOException, InterruptedException {
-        var body = HttpRequest.BodyPublishers.ofString("{\n" +
-                "    \"title\": \"Epic\",\n" +
-                "    \"description\": \"desc\",\n" +
-                "    \"taskType\": \"EPIC\"\n" +
-                "  }", StandardCharsets.UTF_8);
+        var body = HttpRequest.BodyPublishers.ofString("""
+                {
+                    "title": "Epic",
+                    "description": "desc",
+                    "taskType": "EPIC"
+                }""", StandardCharsets.UTF_8);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(HOST + "/epics"))
@@ -386,7 +390,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(201, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode(), "Неверный код ответа");
         assertEquals(1, taskManager.getAllTasks().size(), "Неверное количество задач");
     }
 
@@ -394,12 +398,13 @@ class HttpTaskServerTest {
     public void whenUpdateEpicThenEpicUpdated() throws IOException, InterruptedException {
         Epic e1 = taskManager.createEpic("Epic", "desc");
 
-        var body = HttpRequest.BodyPublishers.ofString("{\n" +
-                "    \"id\": " + e1.getId() + ",\n" +
-                "    \"title\": \"New Title\",\n" +
-                "    \"description\": \"desc\",\n" +
-                "    \"taskType\": \"EPIC\"\n" +
-                "  }", StandardCharsets.UTF_8);
+        var body = HttpRequest.BodyPublishers.ofString("""
+                {
+                    "id": $EPIC_ID$,
+                    "title": "New Title",
+                    "description": "desc",
+                    "taskType": "EPIC"
+                  }""".replace("$EPIC_ID$", String.valueOf(e1.getId())), StandardCharsets.UTF_8);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(HOST + "/tasks/" + e1.getId()))
@@ -412,7 +417,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(201, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode(), "Неверный код ответа");
         assertEquals("New Title", taskManager.getTaskById(e1.getId()).get().getTitle(), "Задача не обновилась");
         assertEquals(1, taskManager.getAllTasks().size(), "Неверное количество задач");
     }
@@ -431,7 +436,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
         assertEquals(0, taskManager.getAllTasks().size(), "Неверное количество задач");
     }
 
@@ -453,7 +458,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         List<Subtask> tasks = gson.fromJson(response.body(), new TaskListTypeToken().getType());
 
@@ -480,7 +485,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
 
         Subtask resultTask = gson.fromJson(response.body(), Subtask.class);
         assertEquals(s1, resultTask, "Задачи не совпадают");
@@ -503,22 +508,23 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(404, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, response.statusCode(), "Неверный код ответа");
     }
 
     @Test
     public void whenCreateSubtaskThenSubtaskCreated() throws IOException, InterruptedException {
         Epic e1 = taskManager.createEpic("Epic", "desc");
 
-        var body = HttpRequest.BodyPublishers.ofString("{\n" +
-                "    \"title\": \"Subtask 1\",\n" +
-                "    \"description\": \"desc\",\n" +
-                "    \"status\": \"NEW\",\n" +
-                "    \"duration\": 20,\n" +
-                "    \"startTime\": \"02012025100000\",\n" +
-                "    \"taskType\": \"SUBTASK\",\n" +
-                "    \"epicId\": " + e1.getId() + "\n" +
-                "  }", StandardCharsets.UTF_8);
+        var body = HttpRequest.BodyPublishers.ofString("""
+                {
+                    "title": "Subtask 1",
+                    "description": "desc",
+                    "status": "NEW",
+                    "duration": 20,
+                    "startTime": "02012025100000",
+                    "taskType": "SUBTASK",
+                    "epicId": $EPIC_ID$
+                  }""".replace("$EPIC_ID$", String.valueOf(e1.getId())), StandardCharsets.UTF_8);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(HOST + "/subtasks"))
@@ -531,7 +537,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(201, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode(), "Неверный код ответа");
         assertEquals(1, e1.getSubtasks().size(), "Подзадача не создана в эпике");
     }
 
@@ -540,16 +546,19 @@ class HttpTaskServerTest {
         Epic e1 = taskManager.createEpic("Epic", "desc");
         Subtask s1 = taskManager.createSubtask("Subtask 1", "desc", e1, duration20, LocalDateTime.of(2025,1,1,10,0));
 
-        var body = HttpRequest.BodyPublishers.ofString("{\n" +
-                "    \"id\": " + s1.getId() + ",\n" +
-                "    \"title\": \"New title\",\n" +
-                "    \"description\": \"desc\",\n" +
-                "    \"status\": \"NEW\",\n" +
-                "    \"duration\": 20,\n" +
-                "    \"startTime\": \"02012025100000\",\n" +
-                "    \"taskType\": \"SUBTASK\",\n" +
-                "    \"epicId\": " + s1.getEpic().getId() + "\n" +
-                "  }", StandardCharsets.UTF_8);
+        var body = HttpRequest.BodyPublishers.ofString("""
+                {
+                    "id": $ID$,
+                    "title": "New title",
+                    "description": "desc",
+                    "status": "NEW",
+                    "duration": 20,
+                    "startTime": "02012025100000",
+                    "taskType": "SUBTASK",
+                    "epicId": $EPIC_ID$
+                  }"""
+                .replace("$ID$", String.valueOf(s1.getId()))
+                .replace("$EPIC_ID$", String.valueOf(s1.getEpic().getId())), StandardCharsets.UTF_8);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(HOST + "/subtasks"))
@@ -562,7 +571,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(201, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_CREATED, response.statusCode(), "Неверный код ответа");
         assertEquals("New title", taskManager.getTaskById(s1.getId()).get().getTitle(), "Задача не обновилась");
         assertEquals(2, taskManager.getAllTasks().size(), "Неверное количество задач");
     }
@@ -572,15 +581,16 @@ class HttpTaskServerTest {
         Task t1 = taskManager.createTask("Task1", "desc", duration20, LocalDateTime.of(2025,1,1,12,0));
         Epic e1 = taskManager.createEpic("Epic", "desc");
 
-        var body = HttpRequest.BodyPublishers.ofString("{\n" +
-                "    \"title\": \"Subtask title\",\n" +
-                "    \"description\": \"desc\",\n" +
-                "    \"status\": \"NEW\",\n" +
-                "    \"duration\": 20,\n" +
-                "    \"startTime\": \"01012025121000\",\n" +
-                "    \"taskType\": \"SUBTASK\",\n" +
-                "    \"epicId\": " + e1.getId() + "\n" +
-                "  }", StandardCharsets.UTF_8);
+        var body = HttpRequest.BodyPublishers.ofString("""
+                {
+                    "title": "Subtask title",
+                    "description": "desc",
+                    "status": "NEW",
+                    "duration": 20,
+                    "startTime": "01012025121000",
+                    "taskType": "SUBTASK",
+                    "epicId": $EPIC_ID$
+                  }""".replace("$EPIC_ID$", String.valueOf(e1.getId())), StandardCharsets.UTF_8);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(HOST + "/subtasks"))
@@ -593,7 +603,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(406, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_NOT_ACCEPTABLE, response.statusCode(), "Неверный код ответа");
     }
 
     @Test
@@ -612,7 +622,7 @@ class HttpTaskServerTest {
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         }
 
-        assertEquals(200, response.statusCode(), "Неверный код ответа");
+        assertEquals(HttpURLConnection.HTTP_OK, response.statusCode(), "Неверный код ответа");
         assertEquals(0, e1.getSubtasks().size(), "Неверное количество задач в эпике");
         assertEquals(1, taskManager.getAllTasks().size(), "Неверное количество задач");
     }
